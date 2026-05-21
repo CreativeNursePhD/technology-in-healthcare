@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>University Hospital: Data Driven Decisions</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;600;700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f0f4f5;
+      --card: #ffffff;
+      --ink: #1a2b30;
+      --muted: #526470;
+      --primary: #1e6b70;
+      --primary-dark: #154f53;
+      --primary-light: #e4f2f2;
+      --accent: #c8e6e7;
+      --warning-bg: #fef9ec;
+      --warning-border: #d4970a;
+      --warning-head: #6b4a08;
+      --success-bg: #edf7f0;
+      --success-border: #2a7d50;
+      --line: #d0dde0;
+      --radius: 16px;
+      --shadow: 0 4px 20px rgba(20,50,55,0.09);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Source Sans 3', sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.65;
+      font-size: 1.01rem;
+    }
+
+    .skip-link {
+      position: absolute; top: -999px; left: 0;
+      background: var(--primary); color: white;
+      padding: 8px 16px; border-radius: 0 0 8px 0;
+      font-weight: bold; z-index: 9999; text-decoration: none;
+    }
+    .skip-link:focus { top: 0; }
+
+    header {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, #2a8a90 100%);
+      color: white; padding: 28px 24px 22px; text-align: center;
+    }
+    header h1 {
+      font-family: 'Lora', Georgia, serif;
+      font-size: clamp(1.5rem, 4vw, 2.1rem);
+      font-weight: 700; margin-bottom: 5px; letter-spacing: -0.01em;
+    }
+    header p { font-size: 0.97rem; opacity: 0.88; letter-spacing: 0.02em; }
+
+    main {
+      width: min(1140px, 95vw);
+      margin: 24px auto 56px;
+      display: grid; gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px;
+    }
+
+    .game-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 340px;
+      gap: 20px; align-items: start;
+    }
+
+    .side-panel { display: grid; gap: 16px; align-content: start; }
+
+    .compact-card { padding: 20px; }
+    .compact-card h3 { margin: 0 0 14px; font-family: 'Lora', Georgia, serif; font-size: 1.05rem; color: var(--primary-dark); }
+
+    h2, h3 { color: var(--primary-dark); line-height: 1.25; font-family: 'Lora', Georgia, serif; }
+    h2 { font-size: 1.45rem; margin-bottom: 12px; }
+    h3 { font-size: 1.08rem; }
+
+    p { margin-bottom: 12px; }
+    p:last-child { margin-bottom: 0; }
+
+    .small-label {
+      display: inline-block; font-size: 0.74rem;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--muted); font-weight: 700; margin-bottom: 10px;
+    }
+
+    .phase-pill {
+      display: inline-block; background: var(--primary-light);
+      color: var(--primary-dark); border-radius: 999px;
+      padding: 5px 14px; font-size: 0.82rem; font-weight: 700;
+      margin-bottom: 12px; border: 1px solid var(--accent);
+    }
+
+    /* ONBOARDING */
+    .how-to-play {
+      background: var(--primary-light); border: 1px solid var(--accent);
+      border-radius: 14px; padding: 20px 22px; margin: 20px 0;
+    }
+    .how-to-play h3 { margin: 0 0 12px; font-size: 1rem; }
+    .how-to-play ol { padding-left: 1.4em; }
+    .how-to-play li { margin-bottom: 8px; font-size: 0.96rem; }
+
+    .metric-explainer {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(195px, 1fr));
+      gap: 10px; margin: 14px 0 0;
+    }
+    .metric-chip {
+      background: white; border: 1px solid var(--line);
+      border-radius: 12px; padding: 10px 12px; font-size: 0.85rem;
+    }
+    .metric-chip strong { display: block; color: var(--primary-dark); margin-bottom: 2px; font-size: 0.82rem; }
+    .metric-chip span { color: var(--muted); line-height: 1.3; }
+
+    /* DASHBOARD */
+    .dashboard {
+      background: #f4f9fa; border: 1px solid var(--line);
+      border-radius: 14px; padding: 16px 18px; margin: 18px 0;
+    }
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0,1fr));
+      gap: 12px; margin-top: 10px;
+    }
+    .db-metric {
+      background: white; border: 1px solid var(--line);
+      border-radius: 12px; padding: 12px 14px;
+    }
+    .db-metric strong {
+      display: block; font-size: 1.25rem;
+      color: var(--primary-dark); font-family: 'Lora', Georgia, serif;
+    }
+    .db-metric span { font-size: 0.82rem; color: var(--muted); }
+    .db-metric .trend {
+      display: inline-block; font-size: 0.75rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 999px; margin-top: 4px;
+    }
+    .trend-up { background: #fdecea; color: #7a1f1f; }
+    .trend-down { background: #edf7f0; color: #1a5c38; }
+    .trend-neutral { background: #f0f4f5; color: var(--muted); }
+    .db-note {
+      font-size: 0.82rem; color: var(--muted); font-style: italic;
+      margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line);
+    }
+
+    /* CHOICES */
+    .choices { display: grid; gap: 10px; margin-top: 20px; }
+
+    button {
+      border: none; cursor: pointer; border-radius: 12px;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.97rem; line-height: 1.45;
+      transition: transform 0.08s ease, box-shadow 0.12s ease, background 0.12s ease;
+    }
+    button:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+    button:hover { transform: translateY(-1px); }
+
+    .choice-btn {
+      text-align: left; background: #eef6f6; color: var(--ink);
+      padding: 14px 18px; border: 1.5px solid #ccdfe1;
+      display: flex; gap: 10px; align-items: flex-start;
+    }
+    .choice-btn:hover { background: #daeced; box-shadow: 0 2px 8px rgba(20,80,90,0.08); }
+    .choice-letter {
+      flex-shrink: 0; background: var(--primary); color: white;
+      font-weight: 700; font-size: 0.82rem; border-radius: 6px;
+      width: 24px; height: 24px; display: flex;
+      align-items: center; justify-content: center; margin-top: 1px;
+    }
+
+    .primary-btn {
+      background: var(--primary); color: white;
+      padding: 13px 22px; font-weight: 700; font-size: 1rem;
+      box-shadow: 0 2px 8px rgba(20,80,90,0.18);
+    }
+    .primary-btn:hover { background: var(--primary-dark); box-shadow: 0 4px 14px rgba(20,80,90,0.22); }
+    .secondary-btn {
+      background: #dde6e8; color: var(--ink);
+      padding: 11px 18px; font-weight: 700;
+    }
+    .secondary-btn:hover { background: #ccd8db; }
+
+    /* FEEDBACK */
+    .feedback {
+      display: none; border-radius: 14px;
+      padding: 16px 20px; margin-top: 20px;
+      animation: fadeSlide 0.25s ease;
+    }
+    .feedback.feedback-positive { background: var(--success-bg); border-left: 5px solid var(--success-border); }
+    .feedback.feedback-neutral  { background: var(--warning-bg); border-left: 5px solid var(--warning-border); }
+    .feedback h3 { margin: 0 0 8px; font-size: 1rem; }
+    .feedback.feedback-positive h3 { color: #1a5c38; }
+    .feedback.feedback-neutral  h3 { color: var(--warning-head); }
+    .feedback p { margin: 6px 0 0; font-size: 0.95rem; }
+
+    .score-impact { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+    .score-chip {
+      font-size: 0.78rem; font-weight: 700;
+      padding: 3px 9px; border-radius: 999px; border: 1px solid;
+    }
+    .score-chip.pos { background: #e6f5ec; color: #1a5c38; border-color: #9fd4b4; }
+    .score-chip.neg { background: #fdecea; color: #7a1f1f; border-color: #f0a8a8; }
+    .score-chip.neu { background: #f0f4f5; color: var(--muted); border-color: var(--line); }
+
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(6px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* REFLECTION */
+    .reflection-box {
+      margin-top: 22px; background: #f7fbff;
+      border: 1px solid #c5d8f0; border-radius: 14px; padding: 20px 22px;
+    }
+    .reflection-box h3 { margin: 0 0 6px; font-size: 1rem; color: #1a3d6b; }
+    .reflection-intro { font-size: 0.9rem; color: var(--muted); margin: 0 0 14px; font-style: italic; }
+
+    textarea, input[type="text"] {
+      width: 100%; border: 1.5px solid var(--line);
+      border-radius: 12px; padding: 12px 14px;
+      font-family: 'Source Sans 3', sans-serif;
+      font-size: 0.98rem; background: white; color: var(--ink);
+      transition: border-color 0.15s;
+    }
+    textarea { min-height: 100px; resize: vertical; }
+    input[type="text"] { min-height: auto; }
+    textarea:focus, input[type="text"]:focus {
+      outline: none; border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(30,107,112,0.12);
+    }
+
+    /* PROGRESS */
+    .progress-text { color: var(--muted); font-size: 0.88rem; margin-bottom: 4px; }
+    .progress-bar-wrap {
+      height: 5px; background: var(--line); border-radius: 999px;
+      margin-bottom: 16px; overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%; background: var(--primary);
+      border-radius: 999px; transition: width 0.3s ease;
+    }
+
+    /* SCOREBOARD */
+    .score-row { margin-bottom: 12px; }
+    .score-row-label {
+      display: flex; justify-content: space-between; align-items: baseline;
+      gap: 8px; font-size: 0.8rem; font-weight: 600; margin-bottom: 5px;
+    }
+    .score-num { font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+    .bar {
+      height: 10px;
+      background: linear-gradient(90deg, #c0392b 0%, #d96c2c 25%, #d4a017 50%, #6aa84f 75%, #2a7d50 100%);
+      border-radius: 999px; overflow: hidden; border: 1px solid #bfcdd0; position: relative;
+    }
+    .bar-marker {
+      position: absolute; top: 0; height: 100%;
+      border-right: 3px solid rgba(20,30,35,0.7);
+      transition: left 0.35s cubic-bezier(.4,0,.2,1);
+    }
+    .gauge-legend {
+      display: flex; justify-content: space-between;
+      font-size: 0.67rem; color: var(--muted); margin-top: 8px;
+    }
+
+    /* CHARACTER LIST */
+    .character-list { display: grid; gap: 10px; padding: 0; list-style: none; }
+    .character-list li { border-radius: 12px; padding: 11px 13px; border: 1px solid; }
+    .character-list li:nth-child(1) { background: #eef4ff; border-color: #bdd0f2; }
+    .character-list li:nth-child(2) { background: #f1f8e8; border-color: #c4dda6; }
+    .character-list li:nth-child(3) { background: #fff4e6; border-color: #e8c98e; }
+    .character-list li:nth-child(4) { background: #f4eeff; border-color: #d5bff0; }
+    .character-list li:nth-child(5) { background: #e8f6f2; border-color: #a8d8c8; }
+    .character-list strong { display: block; color: var(--primary-dark); margin-bottom: 2px; font-size: 0.92rem; }
+    .char-role { font-size: 0.78rem; font-style: italic; color: var(--muted); margin-bottom: 3px; display: block; }
+    .character-list span.desc { font-size: 0.8rem; color: #3a4e56; line-height: 1.4; display: block; }
+
+    /* CHARACTER CALLOUT */
+    .char-callout {
+      display: flex; gap: 12px; align-items: flex-start;
+      background: #f8fbff; border: 1px solid #c5d8ee;
+      border-radius: 13px; padding: 14px 16px; margin: 14px 0;
+    }
+    .char-avatar {
+      flex-shrink: 0; width: 42px; height: 42px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; border: 2px solid white;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.12);
+    }
+    .char-callout-body strong { display: block; font-size: 0.88rem; color: var(--primary-dark); margin-bottom: 3px; }
+    .char-callout-body p { margin: 0; font-size: 0.93rem; color: var(--ink); font-style: italic; line-height: 1.5; }
+
+    /* TECH CALLOUT */
+    .tech-callout {
+      background: #f0f7ff; border: 1px solid #b8d4f0;
+      border-radius: 13px; padding: 14px 16px; margin: 14px 0;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .tech-icon {
+      flex-shrink: 0; width: 38px; height: 38px; border-radius: 10px;
+      background: #1e6b70; color: white; display: flex;
+      align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+    .tech-callout-body strong { display: block; font-size: 0.88rem; color: #1a3d6b; margin-bottom: 3px; }
+    .tech-callout-body p { margin: 0; font-size: 0.9rem; color: #2a3f50; line-height: 1.45; }
+
+    /* CONFLICT BOX */
+    .conflict-box {
+      background: #fff8f0; border: 1px solid #e8c070;
+      border-radius: 13px; padding: 14px 16px; margin: 14px 0;
+    }
+    .conflict-box strong { display: block; font-size: 0.85rem; color: #7a4a08; margin-bottom: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .conflict-box p { margin: 0; font-size: 0.92rem; color: #4a3010; line-height: 1.45; }
+
+    /* SUMMARY */
+    .summary-header {
+      background: linear-gradient(135deg, var(--primary-dark), #2a8a90);
+      color: white; border-radius: 14px; padding: 22px 24px; margin-bottom: 20px;
+    }
+    .summary-header h2 { color: white; margin: 0 0 6px; }
+    .summary-header p { margin: 0; opacity: 0.88; font-size: 0.95rem; }
+
+    .report-section { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+    .report-section:last-child { border-bottom: none; }
+    .report-section h3 { margin-bottom: 10px; }
+
+    .metric-row {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; padding: 9px 0; border-bottom: 1px solid #eef2f3; font-size: 0.95rem;
+    }
+    .metric-row:last-child { border-bottom: none; }
+    .level-badge {
+      font-size: 0.78rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 999px; white-space: nowrap;
+    }
+    .level-advanced   { background: #d4f0e2; color: #155c33; }
+    .level-proficient { background: #ddeeff; color: #1a3f6b; }
+    .level-developing { background: #fff3cc; color: #6b4a08; }
+    .level-emerging   { background: #fde8e8; color: #7a1f1f; }
+
+    .tag {
+      display: inline-block; border-radius: 999px; padding: 4px 11px;
+      font-size: 0.8rem; font-weight: 600; background: var(--primary-light);
+      color: var(--primary-dark); margin: 3px 4px 3px 0; border: 1px solid var(--accent);
+    }
+
+    .reflection-entry {
+      background: #f7fbff; border: 1px solid #c5d8ee;
+      border-radius: 12px; padding: 14px 16px; margin-bottom: 14px;
+    }
+    .reflection-entry .r-prompt { font-size: 0.85rem; color: var(--muted); font-style: italic; margin-bottom: 6px; }
+    .reflection-entry .r-response { font-size: 0.95rem; color: var(--ink); margin-bottom: 10px; }
+    .reflection-entry .r-coaching {
+      font-size: 0.85rem; color: #1a5c38; background: #edf7f0;
+      border-radius: 8px; padding: 8px 10px;
+    }
+
+    .print-note {
+      background: var(--primary-light); border: 1px solid var(--accent);
+      border-radius: 12px; padding: 14px 16px; margin-top: 18px;
+      color: var(--primary-dark); font-size: 0.92rem;
+    }
+    .btn-row { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 820px) {
+      .game-layout { grid-template-columns: 1fr; }
+      .metric-explainer { grid-template-columns: 1fr 1fr; }
+      .dashboard-grid { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 500px) {
+      .card { padding: 18px; }
+      .metric-explainer { grid-template-columns: 1fr; }
+      .dashboard-grid { grid-template-columns: 1fr; }
+    }
+
+    @media print {
+      header, .side-panel, #gameCard, #startCard, .no-print, .btn-row { display: none !important; }
+      body { background: white; }
+      main { display: block; width: 100%; margin: 0; }
+      .card { box-shadow: none; border: 1px solid #ccc; }
+      #summaryCard { display: block !important; }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header>
+    <h1>University Hospital</h1>
+    <p>Data Driven Decisions &mdash; A Nursing Leadership Simulation</p>
+  </header>
+
+  <main id="main-content">
+
+    <!-- START SCREEN -->
+    <section id="startCard" class="card" aria-label="Welcome screen">
+      <span class="small-label">Nursing Leadership Simulation</span>
+      <h2>Welcome to University Hospital</h2>
+
+      <p>You're stepping into the role of a nurse leader at University Hospital. The team is under real pressure: months of understaffing, heavy workloads, missed breaks, and a recent respiratory virus outbreak have stretched everyone thin. Leadership has just received the first round of burnout and workload survey data &mdash; and it's your job to make sense of it, evaluate the technology tools available, and decide what to do next.</p>
+
+      <p>This simulation puts you at the intersection of <strong>data, technology, and leadership</strong>. You'll work with real-looking healthcare dashboards, evaluate specific information and communication technologies, navigate data ethics, and make decisions that connect nurse well-being directly to patient care quality.</p>
+
+      <p><strong>You don't need to be a data scientist. You need to think critically, ask good questions about what the technology is actually telling you, and lead with both evidence and judgment.</strong></p>
+
+      <div class="how-to-play" role="region" aria-label="How to play">
+        <h3>How This Works</h3>
+        <ol>
+          <li><strong>Read each situation carefully.</strong> Many turns include a dashboard snapshot with data that may be incomplete, conflicting, or misleading. Engage with it before choosing.</li>
+          <li><strong>Pick the most thoughtful response.</strong> Four options each turn &mdash; some are better than others, and the differences are often subtle. You'll get immediate feedback explaining the reasoning.</li>
+          <li><strong>Watch your Leadership Metrics.</strong> Five scores in the sidebar track how your choices reflect key dimensions of technology-informed nursing leadership.</li>
+          <li><strong>Stop and reflect.</strong> Several turns include reflection prompts. Your responses appear in your final summary, which you'll save as a PDF and submit to Canvas.</li>
+          <li><strong>Replay if you'd like.</strong> There are no penalties for starting over. Some of the best learning happens the second time through.</li>
+        </ol>
+      </div>
+
+      <h3 style="margin: 20px 0 10px;">Your Five Leadership Metrics</h3>
+      <p style="color:var(--muted); font-size:0.93rem; margin-bottom:10px;">These scores evolve with every decision you make.</p>
+      <div class="metric-explainer" role="list">
+        <div class="metric-chip" role="listitem"><strong>Data-Informed Judgment</strong><span>Interpreting data accurately before drawing conclusions or acting</span></div>
+        <div class="metric-chip" role="listitem"><strong>Technology Stewardship</strong><span>Evaluating, selecting, and using technology responsibly and ethically</span></div>
+        <div class="metric-chip" role="listitem"><strong>Staff Well-Being Support</strong><span>Responding to nurse fatigue, workload, and the human side of the data</span></div>
+        <div class="metric-chip" role="listitem"><strong>Patient Care Continuity</strong><span>Connecting staffing and technology decisions to patient safety outcomes</span></div>
+        <div class="metric-chip" role="listitem"><strong>Trust and Transparency</strong><span>Communicating data findings honestly and building confidence with staff</span></div>
+      </div>
+
+      <div style="margin-top:26px;">
+        <label for="studentName" style="font-weight:600; display:block; margin-bottom:8px;">Enter your name for the final summary:</label>
+        <input id="studentName" type="text" placeholder="Your full name" aria-required="true" style="max-width:380px;" />
+      </div>
+      <div style="margin-top:18px;">
+        <button class="primary-btn" onclick="startGame()">Begin Simulation</button>
+      </div>
+    </section>
+
+    <!-- GAME SCREEN -->
+    <div class="game-layout">
+      <section id="gameCard" class="card hidden" aria-label="Simulation scenario" aria-live="polite">
+        <span id="phase" class="phase-pill"></span>
+        <p id="progress" class="progress-text"></p>
+        <div class="progress-bar-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="100" id="progressBarWrap">
+          <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+        </div>
+        <h2 id="turnTitle"></h2>
+        <div id="scenario"></div>
+        <div id="dashboard" class="dashboard hidden" aria-label="Dashboard snapshot"></div>
+        <div id="choices" class="choices" role="group" aria-label="Your choices"></div>
+        <div id="reflection" class="reflection-box hidden"></div>
+        <div id="feedback" class="feedback" aria-live="polite" aria-atomic="true"></div>
+        <div id="nextArea" class="hidden" style="margin-top:20px;"></div>
+      </section>
+
+      <aside class="side-panel" aria-label="Simulation sidebar">
+        <section class="card compact-card" aria-label="Leadership metrics">
+          <h3>Your Leadership Metrics</h3>
+          <div id="scoreboard" aria-live="polite" aria-atomic="true"></div>
+        </section>
+
+        <section class="card compact-card" aria-label="People you will meet">
+          <h3>People You'll Meet</h3>
+          <ul class="character-list">
+            <li>
+              <strong>Samir Patel, MSN, RN-BC</strong>
+              <span class="char-role">Informatics Nurse &bull; Your technology guide</span>
+              <span class="desc">Methodical and precise. Samir built the dashboard and knows exactly where the data falls short. He'll push you to think carefully about what the technology is actually measuring before you draw conclusions.</span>
+            </li>
+            <li>
+              <strong>Mara Jensen, RN</strong>
+              <span class="char-role">ICU Charge Nurse &bull; 25 years experience</span>
+              <span class="desc">Direct and protective of her team. Mara has seen technology come and go at University Hospital. She'll support data-driven approaches, but only when they're backed by real follow-through.</span>
+            </li>
+            <li>
+              <strong>Caleb Reed, RN</strong>
+              <span class="char-role">Med-Surg Nurse &bull; First year at University Hospital</span>
+              <span class="desc">Still finding his footing. Caleb uses technology fluently but worries about how the data collected about nurses might be used by leadership.</span>
+            </li>
+            <li>
+              <strong>Nora White, RN</strong>
+              <span class="char-role">Night Shift Nurse &bull; 12 years experience</span>
+              <span class="desc">Measured and skeptical. Nora has seen night shift data get absorbed into hospital-wide averages and disappear. She wants to know the technology will actually represent her team's reality.</span>
+            </li>
+            <li>
+              <strong>Lena Brooks, CNA</strong>
+              <span class="char-role">Float CNA &bull; Sees the whole hospital</span>
+              <span class="desc">Observant and pragmatic. Because she floats between units, Lena notices workflow gaps others miss. She's cautious about technology that adds steps without improving care.</span>
+            </li>
+          </ul>
+        </section>
+      </aside>
+    </div>
+
+    <!-- SUMMARY SCREEN -->
+    <section id="summaryCard" class="card hidden" aria-label="Simulation summary">
+      <div class="summary-header">
+        <h2>Simulation Summary</h2>
+        <p id="summaryIntro"></p>
+      </div>
+      <div id="summaryScores"  class="report-section"></div>
+      <div id="summaryStrengths" class="report-section"></div>
+      <div id="summaryGrowth"  class="report-section"></div>
+      <div id="summaryReflections" class="report-section"></div>
+      <div id="summaryPlan"   class="report-section"></div>
+      <div class="print-note no-print">
+        <strong>To submit:</strong> Use your browser's <strong>Print</strong> option and choose <strong>Save as PDF</strong>, then upload the PDF to Canvas.
+      </div>
+      <div class="btn-row no-print">
+        <button class="primary-btn" onclick="window.print()">Print / Save as PDF</button>
+        <button class="secondary-btn" onclick="restartGame()">Start Over</button>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+  /* ═══════════════════════════════════════════════
+     CONSTANTS & STATE
+  ═══════════════════════════════════════════════ */
+  const scoreNames = {
+    data:      "Data-Informed Judgment",
+    tech:      "Technology Stewardship",
+    wellbeing: "Staff Well-Being Support",
+    patient:   "Patient Care Continuity",
+    trust:     "Trust and Transparency"
+  };
+  const startingScores = { data:44, tech:38, wellbeing:42, patient:52, trust:44 };
+  let scores = { ...startingScores };
+  let currentTurn = 0;
+  let studentName = "Student";
+  let reflections = [];
+  let finalPlan = "";
+  let _shuffledChoices = []; // stores {item, origIndex} pairs for current turn
+  let _shuffledReflOpts = []; // same for reflection choice options
+
+  function shuffle(arr) {
+    // Fisher-Yates — returns NEW array of {item, origIndex}, does not mutate
+    const a = arr.map((item, i) => ({ item, origIndex: i }));
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  /* ═══════════════════════════════════════════════
+     HELPERS
+  ═══════════════════════════════════════════════ */
+  function c(text, changes, feedback, planLabel=null) {
+    return { text, changes, feedback, planLabel };
+  }
+
+  function dbMetrics(items) {
+    return `<div class="dashboard-grid" role="list">${items.map(item => {
+      const trendHtml = item[2]
+        ? `<span class="trend ${item[2]}">${item[3]||''}</span>` : '';
+      return `<div class="db-metric" role="listitem">
+        <strong>${item[1]}</strong>
+        <span>${item[0]}</span>
+        ${trendHtml}
+      </div>`;
+    }).join('')}</div>${items[items.length-1][4]
+      ? `<p class="db-note">${items[items.length-1][4]}</p>` : ''}`;
+  }
+
+  const avatarMap = {
+    "Samir": { e:"👨‍💻", bg:"#e8f5f0" },
+    "Mara":  { e:"👩‍⚕️", bg:"#ddeeff" },
+    "Caleb": { e:"🧑‍⚕️", bg:"#e8f8e8" },
+    "Nora":  { e:"👩‍⚕️", bg:"#fff4e0" },
+    "Lena":  { e:"👩‍🦱", bg:"#f4ecff" }
+  };
+
+  function callout(name, role, quote) {
+    const av = avatarMap[name.split(" ")[0]] || { e:"👤", bg:"#eee" };
+    return `<div class="char-callout" role="note" aria-label="${name} says">
+      <div class="char-avatar" style="background:${av.bg}" aria-hidden="true">${av.e}</div>
+      <div class="char-callout-body">
+        <strong>${name}, ${role}</strong>
+        <p>"${quote}"</p>
+      </div>
+    </div>`;
+  }
+
+  function techBox(label, body) {
+    return `<div class="tech-callout"><div class="tech-icon" aria-hidden="true">📊</div>
+      <div class="tech-callout-body"><strong>${label}</strong><p>${body}</p></div></div>`;
+  }
+
+  function conflictBox(body) {
+    return `<div class="conflict-box"><strong>⚠ Data Conflict</strong><p>${body}</p></div>`;
+  }
+
+  function feedbackClass(changes) {
+    const net = Object.values(changes||{}).reduce((a,b)=>a+b,0);
+    return net >= 2 ? "feedback-positive" : "feedback-neutral";
+  }
+
+  /* ═══════════════════════════════════════════════
+     TURNS
+  ═══════════════════════════════════════════════ */
+  const turns = [
+
+    /* ──────────────────────────────────────────────
+       PHASE 1: READING THE SIGNAL (Turns 1–5)
+       Objectives 4, 6 | 8.1a, 8.2a-c, 8.2e, 1.3a-c
+    ─────────────────────────────────────────────── */
+    {
+      phase: "Phase 1: Reading the Signal",
+      title: "Turn 1: What Technology Is Actually Running Here?",
+      scenario: `<p>Your first day reviewing the burnout and workload data at University Hospital. Before you look at a single number, Samir pulls up a list of the information and communication technologies currently in use across the hospital.</p>
+      ${techBox("Current ICT Environment at University Hospital",
+        "Epic EHR (electronic health records and nursing documentation), a third-party pulse survey platform (HealthStream), a staffing and scheduling tool (Kronos Workforce), a basic nurse call and communication system (Ascom), and a newly piloted AI-assisted acuity scoring module in the ICU.")}
+      <p>He looks at you. <em>"Before we start interpreting what the dashboard shows, it helps to understand what's generating the data in the first place. Each of these systems captures different things, and none of them were designed specifically to measure nurse well-being."</em></p>
+      <p><strong>How do you orient yourself to this technology environment?</strong></p>`,
+      choices: [
+        c("Ask Samir to walk you through what each system generates, what it was designed to measure, and where its gaps are before reviewing any results.",
+          { data:2, tech:2 },
+          "This is exactly the right instinct. Effective technology stewardship means understanding the systems generating data before interpreting their output. Epic captures documentation patterns; Kronos captures scheduling and overtime; HealthStream captures survey responses. Each has its own limitations, and knowing those shapes how you read the numbers."),
+        c("Go straight to the HealthStream survey results since that's the most direct measure of nurse burnout.",
+          { data:-1, tech:-1 },
+          "Survey data is valuable, but jumping straight to results without understanding the full ICT environment means missing important context. Epic documentation patterns and Kronos scheduling data can tell you just as much about workload as the survey — and the two together are more reliable than either alone."),
+        c("Assume the data from all systems can be combined directly since they're all used at the same hospital.",
+          { data:-2, tech:-2 },
+          "This is a common and costly assumption. Different systems use different data standards, definitions, and collection methods. Epic and Kronos don't automatically integrate — and data that looks comparable across systems may actually be measuring different things. Interoperability has to be evaluated, not assumed."),
+        c("Focus on the AI acuity scoring module since it's the newest technology and likely generating the most actionable data.",
+          { data:-1, tech:-1 },
+          "New technology isn't automatically the most important. The AI module is worth examining, but it's one piece of a larger picture. Starting with the full technology landscape gives you a more grounded foundation for any decision you make.")
+      ]
+    },
+
+    {
+      phase: "Phase 1: Reading the Signal",
+      title: "Turn 2: How Was This Data Actually Collected?",
+      scenario: `<p>Samir opens the HealthStream survey dashboard and pauses before showing you the results.</p>
+      ${callout("Samir Patel", "Informatics Nurse", "Before you look at the scores, I want to show you something about how this data was collected. It matters more than most leaders realize.")}
+      <p>He explains that the survey was sent by email link to all nursing staff. It was open for 72 hours. Responses were anonymous. There were 18 questions using a 1–10 scale. No reminders were sent. Staff completed it on their own devices, on their own time.</p>`,
+      dashboard: {
+        items: [
+          ["Nurses invited to respond", "120", null, null],
+          ["Responses received", "62 (52%)", "trend-neutral", "52% response rate"],
+          ["Completion window", "72 hours, no reminders", null, null],
+          ["Device used", "Personal device, off-shift", null, null]
+        ],
+        note: "Note: Response rate varies significantly by unit. ICU: 78%. Night shift across all units: 34%."
+      },
+      choices: [
+        c("Note that a 52% response rate and a 34% night shift response rate are significant limitations that should shape how you interpret the results.",
+          { data:2, tech:2 },
+          "Strong, critical thinking. Response rate matters enormously in survey data. When night shift responds at only 34%, the data may systematically underrepresent the staff who are most burdened by late admissions and reduced resources. This is a data quality issue that has to be named before any conclusions are drawn."),
+        c("Accept the results as representative since more than half of nurses responded.",
+          { data:-2, tech:-1 },
+          "A majority response doesn't guarantee representative data. If the 48% who didn't respond are disproportionately from high-risk groups like night shift, the results will systematically undercount the people most at risk. Response pattern, not just rate, determines whether data is representative."),
+        c("Discard the survey results entirely since a 52% response rate makes them unreliable.",
+          { data:-1, tech:-1 },
+          "Discarding imperfect data isn't the answer — almost all real-world healthcare data has limitations. The right approach is to use the results while explicitly naming the limitations. 52% is enough to identify patterns, as long as you're transparent about what the data may be missing."),
+        c("Request that the survey be redesigned and re-sent before you analyze anything.",
+          { data:-1, wellbeing:-1 },
+          "Redesigning before acting delays a response during a period when staff are already strained. Better to analyze the current data carefully, name its limitations, and plan for a more robust follow-up survey. Waiting for perfect data rarely serves the people waiting for action.")
+      ]
+    },
+
+    {
+      phase: "Phase 1: Reading the Signal",
+      title: "Turn 3: What the Numbers Actually Mean",
+      scenario: `<p>The survey results are in front of you now. The hospital-wide average concern score is 6.1 out of 10. But Samir points to something that most leaders miss.</p>
+      ${callout("Samir Patel", "Informatics Nurse", "A 6.1 average sounds moderate. But look at what's underneath it. The range runs from 2.4 to 9.7. And the standard deviation is 2.1, which is high. That tells us the experience of nurses at this hospital is not uniform.")}`,
+      dashboard: {
+        items: [
+          ["Hospital-wide average concern", "6.1 / 10", null, null],
+          ["Range of individual scores", "2.4 – 9.7", null, null],
+          ["Standard deviation", "2.1 (high)", "trend-up", "High variation"],
+          ["ICU average", "7.8 / 10", "trend-up", "Above avg"]
+        ],
+        note: "A high standard deviation means the average is less meaningful as a guide to action. Look for where scores are clustering."
+      },
+      choices: [
+        c("Use the average as a starting signal, but focus your analysis on where scores are clustering and what's driving the high variation.",
+          { data:2, tech:1 },
+          "Exactly right. When standard deviation is high, the mean loses predictive value. What matters is understanding which groups of nurses are scoring high and why. That's where the actionable information lives — and it's what unit-level and subgroup analysis is designed to surface."),
+        c("Communicate to hospital leadership that the average of 6.1 indicates a moderate concern level across University Hospital.",
+          { data:-2, trust:-1 },
+          "Reporting an average without its standard deviation can be misleading — and in a high-stakes situation like nurse burnout, it can lead to under-response. When variation is this high, a single number doesn't represent the actual experience of any particular group of nurses."),
+        c("Ask Samir to remove the outlier scores above 9 so the average is more accurate.",
+          { data:-2, tech:-2 },
+          "Removing high scores to clean up the average is a data integrity problem. Those high scores are likely the nurses at greatest risk. Excluding them doesn't make the data more accurate — it makes it less honest. The outliers are often exactly what you need to pay attention to."),
+        c("Request a breakdown of scores by unit, shift, and years of experience before drawing any conclusions.",
+          { data:2, tech:2 },
+          "This is strong analytical thinking. Subgroup analysis is how you find where concern is concentrated and why. Unit, shift, and experience level are all variables that could explain the high variation — and understanding them is the foundation of a targeted, effective response.")
+      ]
+    },
+
+    {
+      phase: "Phase 1: Reading the Signal",
+      title: "Turn 4: The Problem with How the Data Was Entered",
+      scenario: `<p>Samir pulls up a second layer of the data: nursing documentation patterns from Epic over the past three months.</p>
+      ${callout("Samir Patel", "Informatics Nurse", "Epic shows us that pain assessments are being completed on time 91% of the time. But here's what that number doesn't tell you: some nurses have been entering default values to close the alert, not because they actually completed the assessment. When documentation is rushed or workarounds are used, the data looks fine but it's not reflecting reality.")}
+      <p>This is a data integrity issue rooted in workload pressure — and it has implications for both patient care and for how you interpret any metric that relies on Epic-entered data.</p>
+      <p><strong>How do you respond to what Samir is showing you?</strong></p>`,
+      choices: [
+        c("Recognize that high documentation compliance rates may reflect workarounds rather than actual care, and factor this into how you interpret any Epic-generated metrics.",
+          { data:2, tech:2, patient:1 },
+          "This is sophisticated data literacy. When nurses are using default-entry workarounds to satisfy documentation alerts, compliance metrics become unreliable proxies for actual care. This matters enormously for patient safety and for how you present data to leadership. Data quality depends on how it was entered, not just what it shows."),
+        c("Report the 91% pain assessment completion rate as evidence that documentation quality is strong.",
+          { data:-2, patient:-2 },
+          "This risks presenting misleading information. If that 91% includes default-value entries that don't reflect real assessments, reporting it as evidence of quality is inaccurate and potentially dangerous for patient safety. Data that looks good on a dashboard can mask serious care delivery problems."),
+        c("Ask for a policy reminder to nurses about proper Epic documentation practices.",
+          { data:-1, trust:-1 },
+          "A reminder treats the symptom without addressing the cause. If nurses are using documentation workarounds, it's likely because the workload doesn't allow time for thorough entries. Addressing documentation without addressing workload will be seen as blame, and it won't improve the underlying data quality."),
+        c("Flag the documentation pattern as a potential patient safety concern and investigate what's driving the workarounds before using Epic data to inform decisions.",
+          { data:2, patient:2, trust:1 },
+          "This is the right combination of data integrity and patient safety thinking. Workarounds are often adaptive responses to impossible workloads. Understanding why they're happening tells you something important about staffing and care conditions — and it protects you from building a response plan on unreliable data.")
+      ]
+    },
+
+    {
+      phase: "Phase 1: Reading the Signal",
+      title: "Turn 5: When the Dashboard Disagrees with the Nurse",
+      scenario: `<p>You review the Kronos scheduling data alongside the HealthStream survey results. The Kronos data shows that ICU nurses averaged 41.2 hours per week over the past quarter — slightly above 40 but not dramatically so.</p>
+      ${callout("Mara Jensen", "ICU Charge Nurse", "I'm telling you, my team is running on empty. People are missing breaks, staying late without clocking it because they don't want to cause scheduling problems, and picking up extra shifts that aren't being captured in Kronos. The hours in the system don't tell you what's actually happening.")}
+      ${conflictBox("Kronos shows 41.2 avg hours/week. Mara reports significant untracked overtime, missed breaks, and off-clock work. The survey shows ICU concern at 7.8/10. Which data source do you trust?")}
+      <p><strong>How do you reconcile the data conflict?</strong></p>`,
+      reflection: {
+        type: "choice",
+        prompt: "Reflection: When technology-generated data and a nurse's direct experience tell different stories, how should a nurse leader respond?",
+        intro: "This is one of the most important questions in healthcare informatics. Choose the response that best reflects your thinking.",
+        options: [
+          c("Investigate why the systems disagree. Kronos only captures clocked hours. Mara's account suggests important work isn't being recorded, which means the data has a structural gap.",
+            { data:2, tech:2, trust:1 },
+            "This is exactly the right response. When clinical data and lived experience diverge, the first question is why — not which one is right. In this case, Kronos has a real structural limitation: it only measures recorded time. Off-clock work, missed breaks, and informal coverage arrangements are invisible to it. Both sources are telling you something true about different dimensions of the same problem."),
+          c("Trust the Kronos data because it's objective and system-generated, unlike individual staff impressions.",
+            { data:-2, tech:-1, trust:-2 },
+            "System-generated data isn't inherently more accurate than human observation — it's just differently limited. Kronos measures what gets clocked in and out. It can't measure off-clock work, missed breaks, or the physical and emotional toll of running a unit short-staffed. Over-reliance on quantitative data at the expense of staff voice is a leadership failure, not a data-driven approach."),
+          c("Trust Mara's account because she has 25 years of experience and knows her unit better than any system does.",
+            { data:-1, tech:-1 },
+            "Mara's experience is important and shouldn't be dismissed — but anchoring on one person's account without investigating the data gap isn't rigorous either. The strongest response holds both: her account identifies a structural limitation in the data that's worth investigating, not a reason to abandon the data entirely."),
+          c("Acknowledge both sources, document the discrepancy, and propose a way to capture the data Kronos is missing.",
+            { data:2, tech:2, trust:2 },
+            "This is strong, practical data stewardship. Naming the discrepancy explicitly, documenting it, and proposing a solution — like an off-clock work log, break tracking, or a structured charge nurse report — turns the conflict into an improvement opportunity. This is how healthcare informatics actually advances in practice.")
+        ]
+      },
+      choices: [
+        c("Accept that the Kronos data and Mara's account are both partially right, and identify what Kronos is structurally unable to capture.",
+          { data:2, tech:2, trust:1 },
+          "Strong. Mara isn't contradicting the data — she's revealing its structural gap. Kronos is a scheduling and clock-in system, not a workload monitor. Work done outside clocked hours is invisible to it by design. A nurse leader who can identify that kind of structural limitation is practicing real data literacy."),
+        c("Tell Mara that the Kronos data is the official record and will need to be used for any formal reporting.",
+          { data:-2, trust:-2 },
+          "Official records have their place, but treating Kronos as the complete picture when staff are explicitly describing untracked work would mean building your response plan on incomplete data. Formal records can co-exist with staff-reported data that fills in what the system misses."),
+        c("Ask HR to audit Mara's unit for time clock compliance.",
+          { trust:-2, wellbeing:-1 },
+          "This reframes Mara's concern as a compliance problem rather than a data quality issue. Auditing the people who raised a concern about unreported work is likely to damage trust and discourage nurses from surfacing future problems. The issue is a system gap, not individual behavior."),
+        c("Ask Samir to explore whether the missing data can be captured through a supplemental tracking method alongside Kronos.",
+          { data:2, tech:2, trust:2 },
+          "This is exactly the kind of proactive informatics thinking that closes data gaps. Whether it's a break-tracking log, a charge nurse end-of-shift report, or a simple structured form, creating a way to capture what Kronos misses turns a limitation into an improvement. This is nursing's contribution to health information technology design.")
+      ]
+    },
+
+    /* ──────────────────────────────────────────────
+       PHASE 2: MAKING MEANING (Turns 6–10)
+       Objectives 1, 6 | 8.3a-e, 7.3b-c, 1.3a-c
+    ─────────────────────────────────────────────── */
+    {
+      phase: "Phase 2: Making Meaning",
+      title: "Turn 6: The AI Acuity Tool Raises a Red Flag",
+      scenario: `<p>The ICU piloted an AI-assisted patient acuity scoring module three months ago. The tool uses Epic data to generate a daily acuity score for each patient, which is supposed to guide staffing decisions. Samir flags something in the data.</p>
+      ${techBox("AI Acuity Scoring Module (ICU Pilot)", "The tool uses a predictive algorithm trained on national patient data. It generates a score from 1–5 for each patient. Charge nurses are expected to review the score and use it to inform shift assignments. The model's validation data did not include rural or safety-net hospitals.")}
+      ${callout("Mara Jensen", "ICU Charge Nurse", "The score is fine as a starting point, but I've seen it recommend the same staffing ratio for a patient in respiratory distress that it recommends for a stable post-op patient. My nurses catch it, but it takes time they don't have. And I worry about what happens with newer staff who don't know to question it.")}
+      <p><strong>How do you evaluate this AI tool?</strong></p>`,
+      choices: [
+        c("Recognize that an AI model trained on non-comparable populations may perform differently at University Hospital, and flag this as a decision support tool that requires clinical judgment to override.",
+          { tech:2, data:2, patient:2 },
+          "This is sophisticated technology evaluation. Algorithmic tools trained on populations different from your own can produce systematically biased outputs. That's not a reason to abandon the tool — it's a reason to use it as one input among many, with explicit protocols for when clinical judgment should override the recommendation. Mara's concern about newer nurses is particularly important: inexperienced staff may not know when to question a confident-looking score."),
+        c("Expand the AI tool to all units since it's already running successfully in the ICU.",
+          { tech:-2, patient:-2 },
+          "The ICU experience isn't a success story — it's a warning. Expanding a tool with known accuracy limitations before investigating those limitations is how technology-related patient safety events happen. The AACN Essentials specifically call nurses to evaluate how emerging technologies influence care before deploying them broadly."),
+        c("Discontinue the AI tool immediately since Mara has concerns about its accuracy.",
+          { tech:-1, data:-1 },
+          "Abandoning a tool based on one concern, without systematic evaluation, isn't good technology stewardship either. A more rigorous response is to formally assess the tool's performance against actual patient outcomes at University Hospital and develop protocols for clinical override. That's how healthcare technology is evaluated responsibly."),
+        c("Ask Samir to audit the tool's recommendations against actual charge nurse assignments to see how often nurses are overriding it and why.",
+          { tech:2, data:2, patient:1 },
+          "This is exactly the right evaluation approach. Comparing AI recommendations to actual clinical decisions tells you how much the tool is being trusted, where it diverges from nursing judgment, and whether those divergences track with patient outcomes. This is how decision support tools get evaluated in practice, and it's an important nursing contribution to health IT improvement.")
+      ]
+    },
+
+    {
+      phase: "Phase 2: Making Meaning",
+      title: "Turn 7: Caleb's Concern About Surveillance",
+      scenario: `<p>Caleb Reed pulls you aside after a team meeting. He's thoughtful but clearly has something important to say.</p>
+      ${callout("Caleb Reed", "Med-Surg Nurse", "I'm not trying to be difficult, but some of us are wondering — if the hospital is tracking our documentation timing in Epic, our clock-in patterns in Kronos, and now our survey scores, at what point does data collection become surveillance? How do we know this data won't be used against us in performance reviews?")}
+      <p>This is a legitimate informatics ethics question. The answer matters for whether nurses will continue to enter accurate data into any of these systems.</p>
+      <p><strong>How do you respond to Caleb?</strong></p>`,
+      choices: [
+        c("Acknowledge the concern as valid, explain the specific intended uses of each data type, and commit to written data governance policies that staff can review.",
+          { tech:2, trust:2, wellbeing:1 },
+          "This is the right response on every level. Caleb isn't being obstructionist — he's raising a legitimate data ethics concern that directly affects whether nurses will use these systems honestly. Distinguishing between population-level quality monitoring and individual performance surveillance is an important ethical line, and staff deserve to see it drawn clearly in writing."),
+        c("Tell Caleb that data collected in hospital systems belongs to the hospital and can be used in performance management.",
+          { trust:-3, wellbeing:-2 },
+          "This is legally defensible in some contexts but ethically and practically disastrous. If nurses believe their data entries are being monitored for individual performance, they will document defensively, enter defaults, and disengage from honest survey participation. The data quality problem Samir showed you in Turn 4 gets dramatically worse. Trust in information systems is foundational to their usefulness."),
+        c("Reassure Caleb that the data is anonymous and no one will be identified.",
+          { tech:-1, trust:-1 },
+          "This reassurance may not be accurate. Survey data can sometimes be re-identified in small groups; Epic and Kronos data is linked to individual log-ins and is not anonymous. Offering false reassurance breaks trust when staff eventually discover it's not accurate. Specificity and honesty serve you far better here than general comfort."),
+        c("Explain the difference between population-level quality monitoring and individual performance surveillance, and describe the specific data governance protections in place.",
+          { tech:2, trust:2, data:1 },
+          "This is strong, informed leadership. The distinction between monitoring patterns across a population and evaluating individuals is fundamental to ethical health informatics. Caleb's question deserves a real answer, not a reassurance. Explaining the governance structure — and being honest about where gaps exist — is the kind of transparency that builds lasting trust in technology systems.")
+      ]
+    },
+
+    {
+      phase: "Phase 2: Making Meaning",
+      title: "Turn 8: Night Shift Data Is Missing",
+      scenario: `<p>The unit-level breakdown of survey data arrives. When you look at the night shift row, Samir flags the number.</p>
+      ${callout("Nora White", "Night Shift RN", "I'm not surprised. The survey link came by email on a Monday morning. Half of us were either sleeping or hadn't checked our phones after a 12-hour shift. Leadership has always gotten data about days. We have the same workload and fewer resources, but we end up as a footnote.")}`,
+      dashboard: {
+        items: [
+          ["Day shift response rate", "68%", "trend-neutral", ""],
+          ["Night shift response rate", "34%", "trend-up", "Low"],
+          ["Night shift avg concern score", "Insufficient data", "trend-up", "N < 10"],
+          ["Night shift: missed breaks", "Reported as 'high' by charge", null, null]
+        ],
+        note: "Sample sizes below 10 cannot be reported individually without privacy risk. Night shift data is currently insufficient for unit-level analysis."
+      },
+      choices: [
+        c("Treat the low night shift response rate as a data collection design problem and plan a targeted re-survey using methods that fit night shift workflows.",
+          { tech:2, data:2, trust:2 },
+          "This is the right diagnostic and the right response. The problem isn't that night shift nurses don't have concerns — the problem is that the survey was designed around day shift workflows. Fixing the collection method rather than accepting the gap is good informatics practice, and it shows night shift that their voice is being actively sought, not just passively invited."),
+        c("Note the night shift data gap in your report but proceed with the day shift analysis since that data is sufficient.",
+          { data:-1, trust:-1 },
+          "Proceeding without addressing the gap sends a message to night shift nurses that their systematic underrepresentation is acceptable. It also means your response plan will be shaped by data that reflects day shift experience more than night shift reality. If night shift conditions are actually worse, the response plan built from this data may miss the people who need it most."),
+        c("Use the charge nurse's qualitative report that missed breaks are 'high' as a substitute for the missing night shift survey data.",
+          { data:-1, tech:-1 },
+          "Qualitative reports are valuable and shouldn't be dismissed, but they're not a substitute for structured data. Using an informal report in place of a proper data collection process can introduce bias and is difficult to track over time. The right move is to design a proper night-shift-appropriate data collection method, informed by the charge nurse's input."),
+        c("Avoid reporting the night shift data gap to leadership since it reflects a survey design flaw that might reflect poorly on the informatics team.",
+          { trust:-3, data:-2 },
+          "Concealing a data limitation from leadership to protect the informatics team is an ethical and professional failure. Data quality problems need to be named and addressed, not hidden. Transparent reporting of limitations is what makes data trustworthy — and it's what allows the organization to make better decisions next time.")
+      ]
+    },
+
+    {
+      phase: "Phase 2: Making Meaning",
+      title: "Turn 9: Interpreting the Staffing Data",
+      scenario: `<p>Samir combines the Kronos staffing patterns with the HealthStream survey scores and a pull from Epic on documentation completion timing. The picture that emerges is more complex than any single system showed alone.</p>`,
+      dashboard: {
+        items: [
+          ["Shifts with <4 RNs on Med-Surg", "38% of shifts (Q3)", "trend-up", "↑ from 24% Q2"],
+          ["Avg time to documentation after care", "47 min (target: 30)", "trend-up", "Above target"],
+          ["Survey: workload concern", "8.2 / 10", "trend-up", "High"],
+          ["Epic: late pain assessments", "+22% vs Q2", "trend-up", "Rising"]
+        ],
+        note: "Cross-system analysis: Shifts with understaffing correlate with delayed documentation and higher survey concern scores (r = 0.71)."
+      },
+      choices: [
+        c("Interpret the correlation between understaffing, documentation delays, and high survey concern scores as evidence of a system-level pattern that connects nurse workload to patient care quality.",
+          { data:2, patient:2, tech:1 },
+          "This is exactly how cross-system data analysis should work. A correlation of 0.71 between understaffing and documentation delay is a strong signal that these aren't separate problems — they're the same problem showing up in different systems. This is also how you build the case for resource investment: connecting nurse workload data directly to patient care outcome data makes the argument more compelling and harder to dismiss."),
+        c("Focus on the documentation delay metric since that's the one most directly tied to patient care and the easiest to address.",
+          { data:-1, patient:-1 },
+          "Addressing documentation delays without addressing understaffing is treating the symptom. If nurses are behind on documentation because they're managing four patients with two nurses, a documentation initiative won't change outcomes. The cross-system correlation is the key finding — it shows that the documentation problem and the staffing problem are the same problem."),
+        c("Report the metrics to leadership as three separate issues: staffing, documentation, and nurse satisfaction.",
+          { data:-1, trust:-1 },
+          "Presenting correlated problems as separate issues reduces their impact and may lead to fragmented, ineffective responses. One of the most valuable things informatics analysis can do is show leadership how problems that look separate are actually connected. That's the story this data is telling — and it's worth telling clearly."),
+        c("Recommend a documentation efficiency training program since the 47-minute average is above the 30-minute target.",
+          { data:-2, wellbeing:-1 },
+          "A documentation training program in response to staffing-driven delays is a mismatch between diagnosis and intervention. If nurses are taking 47 minutes because they're also managing admissions, call lights, and medication passes alone, training them to document faster doesn't address the underlying condition. It may also communicate that leadership sees this as a skill problem rather than a workload problem.")
+      ]
+    },
+
+    {
+      phase: "Phase 2: Making Meaning",
+      title: "Turn 10: What the Technology Still Can't Tell You",
+      scenario: `<p>After several days of data analysis, Samir steps back and raises a question that surprises you.</p>
+      ${callout("Samir Patel", "Informatics Nurse", "We've looked at Epic, Kronos, and HealthStream. We have a reasonably good picture of staffing ratios, documentation patterns, and survey scores. But I want to ask: what are we still missing? What matters for nurse well-being that none of these systems are designed to capture?")}
+      <p>You think about Mara's team, Caleb's quiet worry, Nora's night shifts, Lena floating across units. What do Epic, Kronos, and a survey platform not see?</p>
+      <p><strong>Which of the following most accurately identifies the gaps in your current data picture?</strong></p>`,
+      reflection: {
+        type: "text",
+        prompt: "Reflect: What is the most important thing that the technology-generated data at University Hospital is unable to capture, and why does it matter for how you lead?",
+        intro: "Write 2–3 sentences. Think specifically about the limits of Epic, Kronos, and HealthStream — and what those limits mean for your decisions."
+      },
+      choices: [
+        c("The psychological and relational dimensions of work: moral distress, team dynamics, the emotional toll of specific patient situations, and the experience of being a newer nurse in a struggling unit.",
+          { data:2, tech:1, wellbeing:1 },
+          "Exactly right. Epic captures documentation. Kronos captures hours. HealthStream captures survey responses to predetermined questions. None of them capture moral distress, the experience of watching a patient deteriorate while understaffed, the quality of peer relationships, or the particular vulnerability of a first-year nurse navigating a high-acuity unit alone. These are the dimensions that often predict burnout most powerfully — and they require qualitative methods, listening, and direct human engagement to understand."),
+        c("The exact number of patients each nurse cared for on each shift, which would complete the picture.",
+          { data:-1, tech:0 },
+          "Patient census by nurse is useful, but it still doesn't capture the relational and psychological dimensions of work. A nurse managing four relatively stable patients may experience more moral distress than a nurse managing six patients with strong team support. Quantitative completeness isn't the same as understanding the full experience of work."),
+        c("Whether nurses are using the Ascom communication system effectively, since communication breakdowns may be contributing to workload.",
+          { data:0, tech:-1 },
+          "Communication system use is worth examining, but it's a narrow technological lens for a broad human question. The question Samir is raising is more fundamental: what do all these systems collectively fail to see? The answer points toward qualitative, relational, and psychological dimensions that no communication log can capture."),
+        c("More granular Epic data, broken down by individual nurse and time of day.",
+          { data:-1, tech:-2 },
+          "More granular individual data raises the surveillance concerns Caleb raised in Turn 7, and it still doesn't address the fundamental gap Samir is naming. Drilling deeper into existing technology types won't reveal what those technologies are structurally unable to see. This question calls for different kinds of data, not more of the same.")
+      ]
+    },
+
+    /* ──────────────────────────────────────────────
+       PHASE 3: CHOOSING TECHNOLOGY RESPONSES (Turns 11–15)
+       Objectives 2, 3, 5 | 8.1f, 8.4a/d, 8.5a/e, 8.3d
+    ─────────────────────────────────────────────── */
+    {
+      phase: "Phase 3: Choosing Technology Responses",
+      title: "Turn 11: Selecting the Right Tool for the Job",
+      scenario: `<p>Leadership asks you to recommend a technology solution to improve real-time awareness of nurse workload and staffing strain. Three vendors have submitted proposals.</p>
+      ${techBox("Option A: Real-Time Acuity Dashboard (BedMaster)", "Integrates with Epic to display patient acuity and nurse assignment data in real time. $48,000/year. Requires 8 hours of nurse training. Does not capture off-unit work or break data.")}
+      ${techBox("Option B: Nurse Pulse Check App (WellTrack)", "A mobile app where nurses log a 3-item well-being check at the start and end of each shift. $12,000/year. Low burden. Does not integrate with Epic or Kronos. Privacy policy allows de-identified data to be shared with third parties.")}
+      ${techBox("Option C: Enhanced Kronos Workforce Analytics Module", "Adds break-tracking, overtime flagging, and staffing ratio alerts to the existing Kronos system. $22,000/year. Builds on familiar technology. Does not capture patient acuity or nurse-reported well-being.")}
+      <p><strong>Which technology do you recommend, and on what basis?</strong></p>`,
+      choices: [
+        c("Recommend Option C as the first step, because it addresses the specific data gap identified in Kronos, builds on familiar technology, and doesn't introduce new privacy risks.",
+          { tech:2, data:2, trust:1 },
+          "Thoughtful, grounded recommendation. Option C directly addresses the gap Mara identified in Turn 5: untracked overtime, missed breaks, and staffing ratio blind spots. It builds on a system nurses already use, which lowers training burden and implementation resistance. And unlike Option B, it doesn't introduce a third-party data-sharing privacy concern. Strong technology decisions start with the identified gap, not the most impressive-sounding solution."),
+        c("Recommend Option A because a real-time acuity dashboard is the most technologically sophisticated option and integrates with Epic.",
+          { tech:-1, data:-1 },
+          "Sophistication isn't a selection criterion. Option A doesn't address the primary data gap — untracked overtime and missed breaks — and it costs more than twice as much as Option C. Before recommending a technology, the question is always: what problem does this solve, and is it the right problem? Integration with Epic is valuable, but only if Epic is where the gap is."),
+        c("Recommend Option B because it captures nurse-reported well-being directly and is the least expensive.",
+          { tech:-2, trust:-1 },
+          "Cost is one factor, but Option B has a significant problem: the privacy policy allows de-identified data to be shared with third parties. Given the trust concerns Caleb raised in Turn 7, recommending a tool that shares staff wellness data outside the organization — even de-identified — could seriously damage the data collection trust you've been building. Legal and ethical standards around health data apply to vendor relationships, not just internal use."),
+        c("Recommend piloting Option C while simultaneously requesting that IT evaluate whether a future integration between Kronos and Epic is feasible.",
+          { tech:2, data:2, trust:2 },
+          "This is excellent phased technology planning. Starting with Option C solves a real problem now, while commissioning an IT feasibility evaluation sets up a more integrated future state. This approach is responsive to current need, fiscally responsible, and builds toward the kind of interoperability that makes cross-system analysis more reliable. It also demonstrates the kind of nursing engagement in technology planning that the AACN Essentials call for.")
+      ]
+    },
+
+    {
+      phase: "Phase 3: Choosing Technology Responses",
+      title: "Turn 12: When the Dashboard Recommends Something Wrong",
+      scenario: `<p>Two weeks after enhanced Kronos analytics go live, the system flags Med-Surg as within normal staffing ranges for the shift. But Lena Brooks stops you in the hallway.</p>
+      ${callout("Lena Brooks", "Float CNA", "I was just on Med-Surg. Kronos says they're covered. But two nurses called in this morning, and the charge nurse is managing a fresh post-op and two patients waiting for discharge orders. The system is looking at numbers, not what's actually happening on the unit.")}
+      <p>This is the core tension at the heart of clinical decision support technology: the system says one thing, the person on the ground says another.</p>
+      <p><strong>How do you respond?</strong></p>`,
+      choices: [
+        c("Treat Lena's real-time observation as the more reliable signal in this moment, and investigate why the Kronos alert didn't fire.",
+          { tech:2, patient:2, trust:2 },
+          "Clinical judgment must prevail when technology gives an incomplete picture — and this is a textbook example. Kronos is counting bodies against a staffing ratio formula. It can't see that one of those bodies is managing a post-op patient with complex needs, or that discharge delays are about to create a backlog. Lena's observation is more contextually rich than the algorithm. The right response is to act on her information and then investigate the system gap."),
+        c("Tell Lena that the Kronos data is the official staffing record and escalate through formal channels before acting.",
+          { tech:-2, patient:-2 },
+          "This is a patient safety situation unfolding in real time. Deferring to a system record that you now have credible reason to believe is inaccurate — while a patient is potentially at risk — would be a serious failure of clinical judgment. Technology supports decisions; it doesn't replace them. This is exactly the situation the AACN Essentials mean when they say clinical judgment and critical thinking must prevail in the presence of technology."),
+        c("Report the system's failure to Samir so he can investigate the algorithm.",
+          { tech:1, patient:-1 },
+          "Reporting the system gap to Samir is important and should happen — but it's not a first response when patient safety is in question right now. Addressing the immediate staffing need takes priority over the informatics investigation. Both matter, but in sequence."),
+        c("Act on Lena's information immediately to address the staffing gap, then document what happened and report the system discrepancy to Samir and IT for investigation.",
+          { tech:2, patient:2, trust:2, data:1 },
+          "This is the complete response. You act on the clinical reality first, then close the loop by documenting the incident and reporting the system discrepancy. The documentation matters because recurring discrepancies between Kronos output and actual conditions need to be tracked — that's how healthcare organizations evaluate and improve their technology over time. You've protected the patient and generated the data needed to improve the system.")
+      ]
+    },
+
+    {
+      phase: "Phase 3: Choosing Technology Responses",
+      title: "Turn 13: Telehealth and the Night Shift Gap",
+      scenario: `<p>Hospital administration proposes a solution to the night shift support gap: a telehealth consultation service that would give night shift nurses on-demand access to a remote charge nurse or clinical supervisor between midnight and 6 AM, when on-site leadership is thinnest.</p>
+      ${techBox("Proposed Telehealth Consultation Service", "Video-based, secure platform. Remote charge RN available via tablet on each unit. Estimated cost: $18,000/year. Requires a dedicated night shift remote charge RN position. Platform is HIPAA-compliant. Asynchronous messaging also available for non-urgent questions.")}
+      ${callout("Nora White", "Night Shift RN", "I want to be honest — I have mixed feelings. I think it could help. But I also wonder if this is a way for leadership to feel like they've addressed the night shift problem without actually adding staff to the floor.")}
+      <p><strong>How do you evaluate this proposal?</strong></p>`,
+      choices: [
+        c("Support the telehealth consultation service as a genuine clinical communication tool, while being transparent with Nora that it supplements but does not replace adequate staffing.",
+          { tech:2, trust:2, patient:1 },
+          "This is the honest, balanced response. Telehealth is a legitimate information and communication technology that can meaningfully improve access to clinical expertise during night shift hours. But Nora's concern is also legitimate: if this becomes leadership's answer to the staffing question, it's a technology substitution for a workforce solution. Being explicit about what this technology can and can't do — with staff, and with administration — is good technology stewardship and good communication."),
+        c("Decline the telehealth proposal because what night shift needs is more nurses, not more technology.",
+          { tech:-1, patient:-1 },
+          "Nora's concern is understandable, but rejecting a useful clinical communication tool because it doesn't solve everything misses its actual value. Telehealth access to a charge nurse at 3 AM is genuinely better than no access to one. The answer is to advocate for both: implement the technology and continue pushing for staffing. These are not mutually exclusive."),
+        c("Recommend the telehealth service as the primary response to the night shift concern.",
+          { tech:-1, trust:-2, wellbeing:-1 },
+          "Presenting telehealth as the primary response to a staffing gap is exactly what Nora is worried about. It positions technology as a substitute for human resources in a way that addresses the appearance of the problem without addressing its substance. Staff who see this happen tend to become significantly more skeptical of future technology proposals."),
+        c("Recommend the telehealth service while explicitly documenting that night shift staffing levels remain a separate concern requiring a separate response.",
+          { tech:2, trust:2, patient:1 },
+          "This is precise and responsible. Recommending the technology while formally documenting that it doesn't address the staffing question keeps both issues alive. It prevents technology implementation from being used to close the staffing conversation, and it creates a paper trail that keeps leadership accountable for both responses. This is how you use technology leadership to protect staff interests rather than substitute for them.")
+      ]
+    },
+
+    {
+      phase: "Phase 3: Choosing Technology Responses",
+      title: "Turn 14: Communication Technology and the Information Gap",
+      scenario: `<p>You've learned that important updates — staffing changes, protocol revisions, equipment outages — are reaching day shift nurses reliably but missing night shift, float staff like Lena, and per-diem nurses who don't check their hospital email regularly.</p>
+      ${callout("Samir Patel", "Informatics Nurse", "This is a health information exchange problem at the unit level. The information exists. The technology to send it exists. The problem is the channel doesn't match the workflow of the people who need it most.")}
+      <p>You've been asked to recommend a communication technology approach for a mixed staff population across shifts, units, and employment statuses.</p>
+      <p><strong>What do you recommend?</strong></p>`,
+      choices: [
+        c("Recommend a layered approach: secure group messaging via Epic's communication module for clinical updates, unit huddle boards for visual reminders, and a structured end-of-shift handoff template that includes key updates for incoming staff.",
+          { tech:2, trust:2, patient:1 },
+          "Layered communication is best practice when a single channel doesn't reach everyone. Epic's secure messaging is already HIPAA-compliant and familiar to nursing staff. Huddle boards are low-tech but effective for shift-to-shift visual communication. A structured handoff template ensures information transfer isn't dependent on memory or informal channels. This approach meets staff where they are rather than requiring them to adopt new behavior."),
+        c("Implement a mandatory daily login to a new staff communication app for all nursing staff.",
+          { tech:-1, wellbeing:-1, trust:-1 },
+          "Mandatory daily logins to a new platform add workflow burden without guaranteeing information reaches people at the right time. A night shift nurse who logs in at 11 PM before her shift may miss an update that went out at 8 AM. Technology adoption also tends to be poor when it feels imposed. The right technology fits existing workflows rather than requiring staff to adapt to the technology."),
+        c("Expand the current email system to include all float and per-diem staff on the distribution list.",
+          { tech:-1, trust:0 },
+          "Email expansion is a minimal step, but it doesn't solve the core problem Samir identified: email doesn't match the workflow of nurses who move between units or work nights. Adding more people to a channel that's already not working for this population doesn't change the outcome. The problem is the channel, not the list."),
+        c("Ask IT to evaluate whether Epic's secure communication module can be configured to push alerts to staff based on their scheduled shifts, so updates reach people at clinically relevant times.",
+          { tech:2, data:1, trust:1 },
+          "This is smart, workflow-aware technology thinking. Shift-based alert configuration means night shift nurses get relevant updates when they're actually working — not at 10 AM when they're asleep. This is the kind of nursing engagement in health IT planning the AACN Essentials describe: identifying a clinical workflow need and working with IT to configure existing technology to meet it.")
+      ]
+    },
+
+    {
+      phase: "Phase 3: Choosing Technology Responses",
+      title: "Turn 15: A Request for Standardized Nursing Data",
+      scenario: `<p>Samir brings a proposal to the nursing leadership team. He wants to implement standardized nursing terminology — specifically SNOMED CT nursing assessments — in the Epic documentation templates. The goal is to make nursing data comparable across units, trackable over time, and linkable to patient outcomes in the hospital's quality database.</p>
+      ${callout("Samir Patel", "Informatics Nurse", "Right now, two nurses can document the same intervention in twelve different ways, and the system treats them as twelve different things. Standardization means nursing's contribution to patient outcomes becomes visible in the data. Without it, nursing work is essentially invisible in population-level quality reporting.")}
+      ${callout("Mara Jensen", "ICU Charge Nurse", "I understand the value. But my concern is the implementation. If this adds documentation time for nurses who are already stretched, we'll see more workarounds, not better data.")}
+      <p><strong>How do you approach this decision?</strong></p>`,
+      reflection: {
+        type: "text",
+        prompt: "Reflect: Why does standardized nursing data matter for demonstrating nursing's contribution to care, and what implementation risks would you want to address before proceeding?",
+        intro: "Write 3–4 sentences. Think about what standardized data makes possible and what Mara's concern tells you about implementation."
+      },
+      choices: [
+        c("Support standardization in principle and partner with Samir and frontline nurses to design an implementation that minimizes documentation burden.",
+          { tech:2, data:2, trust:1, wellbeing:1 },
+          "This is the right both/and response. Samir is right that standardized nursing data is essential for making nursing's contribution to care visible in population health reporting, quality metrics, and research — and for generating the kind of evidence that justifies staffing investment. Mara is right that poor implementation will produce workarounds that defeat the purpose. The answer is to invest in both the technical standard and the workflow design. Nurses should be at the table for both decisions."),
+        c("Decline the standardization proposal since nursing documentation is already burdensome.",
+          { tech:-2, data:-2 },
+          "This trades a short-term implementation challenge for a long-term invisibility problem. If nursing assessments aren't captured in standardized, searchable data, nursing's contribution to patient outcomes remains anecdotal. That makes it harder to justify staffing, harder to demonstrate quality impact, and harder for the profession to build an evidence base. The burden concern is real, but the answer is better implementation design, not rejecting standardization."),
+        c("Implement the SNOMED CT templates immediately in Epic without a pilot, since the data benefits are clear.",
+          { tech:-1, wellbeing:-2, data:-1 },
+          "Implementing without a pilot ignores Mara's legitimate concern. Standardized documentation templates that add time to an already-strained workflow will generate the same workarounds Samir identified in Turn 4 — and the resulting data will be less accurate than what you started with. Piloting first, with nursing feedback built in, is how you get implementation right."),
+        c("Pilot the standardized documentation in one unit with active nursing input, evaluate the impact on documentation time and data quality, and scale only if outcomes are positive.",
+          { tech:2, data:2, wellbeing:1, trust:2 },
+          "This is excellent technology stewardship and nursing leadership at the same time. A pilot with active nursing input respects both the data quality goal and the implementation concern. Measuring documentation time and data quality before scaling gives you evidence to guide the decision. And involving nurses in the design means they're more likely to use the templates accurately rather than working around them. This is how nursing shapes health information technology — from the inside, with expertise.")
+      ]
+    },
+
+    /* ──────────────────────────────────────────────
+       PHASE 4: COMMUNICATING AND SUSTAINING (Turns 16–20)
+       Objectives 2, 7 | 6.1a/b/e/f, 10.3i, 8.5e
+    ─────────────────────────────────────────────── */
+    {
+      phase: "Phase 4: Communicating and Sustaining",
+      title: "Turn 16: Sharing What You Found",
+      scenario: `<p>It's time to communicate findings to staff across University Hospital. You've collected significant data about workload, staffing patterns, documentation integrity, technology gaps, and nurse well-being. The question is how to share it responsibly.</p>
+      ${callout("Mara Jensen", "ICU Charge Nurse", "People are going to want to know what the data actually showed. Not a sanitized version. But I also don't want my nurses feeling like they're being put on display. There's a difference between being transparent and being exposed.")}
+      <p><strong>How do you communicate findings to staff?</strong></p>`,
+      choices: [
+        c("Share summarized, unit-level trend data with clear context, privacy protections in place, and an explicit explanation of what the data will and won't be used for.",
+          { trust:2, tech:2, data:1 },
+          "Mara has named the key tension precisely. Transparency and privacy aren't opposites, but they do require careful navigation. Summarized unit-level trends — not individual scores — shared with context, with privacy safeguards named explicitly, and with a clear statement of intended use, gives staff the honesty they deserve without exposing individuals. This is responsible data communication."),
+        c("Share only hospital-wide aggregate data to avoid any risk of unit-level identification.",
+          { trust:-1, data:-1 },
+          "Hospital-wide data hides the variation that matters most. ICU and night shift nurses who've been vocal about their specific concerns will feel erased if the response is built on averages that dilute their experience. Protecting privacy is important; flattening variation is something different."),
+        c("Share all raw data so staff can see everything and draw their own conclusions.",
+          { tech:-2, trust:-1 },
+          "Raw data without context often generates more confusion than clarity — and in small units, individual responses can sometimes be inferred from detailed data sets. Professional communication of research and quality findings involves interpretation, contextualization, and appropriate summarization. That's not spin; it's responsible stewardship."),
+        c("Share findings only with unit managers and let them decide what to communicate to frontline staff.",
+          { trust:-2, data:-1 },
+          "Filtering data through managers before it reaches frontline nurses tends to create exactly the kind of 'leadership decides what we need to know' dynamic that erodes trust. Nurses who participated in a survey deserve to hear the results directly — with appropriate context and protections — not as a secondhand summary curated by their supervisors.")
+      ]
+    },
+
+    {
+      phase: "Phase 4: Communicating and Sustaining",
+      title: "Turn 17: Technology's Impact on Professional Wellness",
+      scenario: `<p>In a team conversation, the topic shifts to how technology itself affects nurse well-being — not just as a data collection tool, but as a presence in daily work life.</p>
+      ${callout("Caleb Reed", "Med-Surg Nurse", "I timed myself one shift. I spent 4.2 hours in Epic. That's out of a 12-hour shift. And that's not counting the Ascom alerts, Kronos punch-ins, or the AI score I'm supposed to review. I became a nurse to take care of people. Sometimes the technology feels like it's taking care of itself, and I'm just maintaining it.")}
+      ${callout("Lena Brooks", "Float CNA", "The call light system went down for two hours last week and everyone panicked. We've lost the ability to function without it. I'm not sure that's a good thing.")}
+      <p><strong>How do you respond to these observations as a nurse leader?</strong></p>`,
+      choices: [
+        c("Acknowledge both observations as legitimate critiques of technology implementation, and commit to advocating for technology design and workload balance that keeps the nurse-patient relationship central.",
+          { wellbeing:2, trust:2, tech:1 },
+          "These are not complaints to be managed — they're important professional observations. Caleb is describing alert fatigue and documentation burden as contributors to moral distress. Lena is describing technology dependency as a resilience risk. Both are relevant to your role as a nurse leader evaluating technology impact on professional wellness. The AACN Essentials specifically call nurses to reflect on contemporary healthcare technology and its impact on professional wellness and resiliency. This conversation is that reflection happening in real time."),
+        c("Tell Caleb that Epic documentation is a regulatory requirement and the time investment is non-negotiable.",
+          { trust:-2, wellbeing:-1 },
+          "This shuts down a productive conversation with a compliance reminder. Caleb isn't disputing that documentation is required — he's raising a valid concern about whether the volume and design of documentation requirements are compatible with the actual work of nursing. That's a conversation worth having, and dismissing it reduces the quality of feedback you receive about technology's real impact on care."),
+        c("Suggest that Caleb improve his Epic efficiency through additional training.",
+          { trust:-1, wellbeing:-1 },
+          "Efficiency training may have marginal value, but it doesn't address what Caleb is describing. Four-plus hours of documentation in a 12-hour shift is a design and workload problem, not a skill problem. Framing it as a skill gap can feel dismissive and accurate — nurses who've been documenting for years don't need to be told they're doing it inefficiently."),
+        c("Bring Caleb's documentation burden data to Samir and advocate for an EHR optimization review with nursing input.",
+          { wellbeing:2, tech:2, trust:2 },
+          "This turns a valid complaint into an actionable informatics initiative. EHR optimization reviews — where nurses identify redundant fields, poorly designed alerts, and documentation workflows that don't match care workflows — are a real and important mechanism for improving technology-nurse relationships. Nursing engagement in technology planning isn't just about selecting tools; it's about continuously evaluating whether the tools are serving care or replacing it.")
+      ]
+    },
+
+    {
+      phase: "Phase 4: Communicating and Sustaining",
+      title: "Turn 18: The Follow-Up Evaluation Plan",
+      scenario: `<p>You've implemented several technology interventions over the past 60 days: the enhanced Kronos analytics module, night shift targeted re-survey, the telehealth consultation service, and Epic communication improvements. Now Samir asks how you want to evaluate whether they're working.</p>`,
+      dashboard: {
+        items: [
+          ["Kronos: untracked overtime alerts", "Down 18% vs baseline", "trend-down", "↓ Improving"],
+          ["Night shift survey response rate", "Up from 34% to 61%", "trend-down", "↑ Improving"],
+          ["Telehealth consult utilization", "3.2 consults/night avg", "trend-neutral", "Early data"],
+          ["Epic alert override rate", "Unchanged at 23%", "trend-up", "Needs attention"]
+        ],
+        note: "60-day preliminary data. Sample sizes still relatively small; interpret with caution."
+      },
+      choices: [
+        c("Evaluate each intervention against the specific problem it was designed to solve, using both quantitative metrics and qualitative staff feedback.",
+          { tech:2, data:2, trust:1 },
+          "This is rigorous evaluation practice. The Kronos analytics module was designed to surface untracked overtime — the 18% reduction in alerts suggests it's working. The night shift survey response rate improvement suggests the redesigned collection method is reaching the right people. The unchanged Epic override rate is a signal that the AI acuity tool still needs attention. Matching metrics to intended outcomes, and combining them with staff feedback, is how you know what's actually working."),
+        c("Declare the interventions successful based on the positive early trends and close the action items.",
+          { data:-2, trust:-1 },
+          "Preliminary data with small sample sizes is a signal to continue monitoring, not a basis for declaring success. The unchanged Epic override rate in particular suggests the AI tool problem identified in Turn 6 hasn't been addressed. Closing action items prematurely is how improvement initiatives stall before they've actually changed anything."),
+        c("Focus evaluation entirely on whether nurse survey scores have improved since that's the most direct measure of the program's success.",
+          { data:-1, tech:-1 },
+          "Survey scores are one important measure, but they're a lagging indicator that may not yet reflect 30-day interventions. Evaluating only survey scores ignores the operational data — Kronos overtime trends, Epic override rates, telehealth utilization — that gives you much earlier and more actionable feedback on whether specific interventions are working as designed."),
+        c("Ask Samir to design a 90-day evaluation framework that includes system metrics, staff surveys, and qualitative feedback sessions, with interim check-ins at 30 and 60 days.",
+          { tech:2, data:2, trust:2 },
+          "This is sophisticated program evaluation. A 90-day framework with interim check-ins acknowledges that some interventions take time to show effects, builds in course-correction opportunities, and uses multiple data types that complement each other. It also signals to staff that evaluation is ongoing, not a one-time event — which increases confidence that the organization is genuinely monitoring outcomes rather than checking a box.")
+      ]
+    },
+
+    {
+      phase: "Phase 4: Communicating and Sustaining",
+      title: "Turn 19: Nursing Leadership in Technology Planning",
+      scenario: `<p>Hospital administration announces that the IT department is beginning a two-year Epic upgrade project. The project will redesign nursing documentation workflows, update the alert system, and integrate a new sepsis early-warning algorithm. The project team plans to bring in an external implementation consultant and would like to begin in 90 days.</p>
+      ${callout("Samir Patel", "Informatics Nurse", "I've seen hospitals do Epic upgrades without meaningful nursing input. The workflow assumptions that get built into the system end up creating years of workarounds. This is the moment where nursing leadership can either shape this or just react to it.")}
+      <p><strong>What do you do?</strong></p>`,
+      choices: [
+        c("Formally request that nursing be represented on the Epic upgrade project team from the start, with frontline nurses included alongside nursing leadership.",
+          { tech:2, trust:2, data:1 },
+          "This is exactly what the AACN Essentials mean when they say nurses must be engaged in the planning and selection of healthcare technologies. An Epic upgrade that redesigns nursing documentation without nursing input will produce documentation workflows built on assumptions that don't match actual clinical practice. Getting nursing at the table before the design decisions are made — not just during training — is how you prevent years of workarounds and documentation burden. Frontline nurses alongside leadership matters because each has different visibility into the problem."),
+        c("Trust the external implementation consultant to represent clinical needs since that's their specialty.",
+          { tech:-2, data:-1 },
+          "External consultants bring implementation expertise, but they don't know your unit workflows, your nursing staff's documentation practices, or the workarounds that have developed around the current system. Nursing's contribution to this process is irreplaceable precisely because it's specific to this context. Deferring to a consultant substitutes a general expertise for a specific one that only you can provide."),
+        c("Wait until the implementation is underway before raising nursing concerns, since that's when specific problems will be visible.",
+          { tech:-2, trust:-1 },
+          "By the time implementation is underway, the core design decisions have already been made. Raising concerns during rollout typically results in workarounds rather than redesign. The influence is in the planning phase. Nurses who wait until go-live to provide input end up adapting to the system rather than shaping it — which is exactly the dynamic Samir is warning against."),
+        c("Ask Samir to represent nursing informatics needs on the project team since he has the technical background to speak that language.",
+          { tech:-1, trust:-1 },
+          "Samir is an essential voice on any informatics project. But clinical nurses — charge nurses, frontline staff, float CNAs — see workflow realities that informatics nurses don't always see from a systems perspective. Both are needed. Sending only the informatics nurse substitutes technical representation for clinical representation in a decision that will affect clinical work for years.")
+      ]
+    },
+
+    {
+      phase: "Phase 4: Communicating and Sustaining",
+      title: "Turn 20: Final Reflection",
+      scenario: `<p>You've completed the full leadership cycle at University Hospital: evaluating the technology environment, identifying data gaps, making sense of conflicting information, choosing technology responses, navigating ethics and privacy, communicating findings, and advocating for nursing's role in shaping the systems that shape nursing practice.</p>
+      <p>Along the way you worked with Samir, Mara, Caleb, Nora, and Lena — each of whom gave you something a dashboard couldn't: context, lived experience, and honest perspective about what the technology was and wasn't seeing.</p>
+      <p><strong>Before we generate your summary, take a few minutes with the final reflection.</strong></p>`,
+      reflection: {
+        type: "text",
+        prompt: "Final Reflection: What did this simulation help you understand about the relationship between data, technology, and nursing leadership? What is one specific insight you'll carry into your practice?",
+        intro: "Write 4–6 sentences. Be specific. Connect something from the simulation to something real about how you want to practice as a nurse leader in a technology-rich environment."
+      },
+      finalOnly: true
+    }
+  ];
+
+  /* ═══════════════════════════════════════════════
+     GAME ENGINE
+  ═══════════════════════════════════════════════ */
+  function startGame() {
+    studentName = document.getElementById("studentName").value.trim() || "Student";
+    document.getElementById("startCard").classList.add("hidden");
+    document.getElementById("gameCard").classList.remove("hidden");
+    renderTurn();
+    renderScores();
+  }
+
+  function renderScores() {
+    document.getElementById("scoreboard").innerHTML =
+      Object.keys(scores).map(key => `
+        <div class="score-row">
+          <div class="score-row-label">
+            <span>${scoreNames[key]}</span>
+            <span class="score-num">${scores[key]}</span>
+          </div>
+          <div class="bar" role="img" aria-label="${scoreNames[key]}: ${scores[key]} out of 100">
+            <div class="bar-marker" style="left:${Math.min(scores[key],99)}%"></div>
+          </div>
+        </div>`).join("") +
+      `<div class="gauge-legend"><span>Needs Attention</span><span>Developing</span><span>Strong</span></div>`;
+  }
+
+  function renderTurn() {
+    const turn = turns[currentTurn];
+    const pct  = Math.round((currentTurn / turns.length) * 100);
+
+    document.getElementById("phase").textContent = turn.phase;
+    document.getElementById("progress").textContent = `Turn ${currentTurn+1} of ${turns.length}`;
+    document.getElementById("progressBar").style.width = pct + "%";
+    document.getElementById("progressBarWrap").setAttribute("aria-valuenow", pct);
+    document.getElementById("turnTitle").textContent = turn.title;
+    document.getElementById("scenario").innerHTML = turn.scenario || "";
+
+    const db = document.getElementById("dashboard");
+    if (turn.dashboard) {
+      db.innerHTML = `<span class="small-label">Dashboard Snapshot</span>` +
+        dbMetrics(turn.dashboard.items) +
+        (turn.dashboard.note ? `<p class="db-note">${turn.dashboard.note}</p>` : "");
+      db.classList.remove("hidden");
+    } else {
+      db.classList.add("hidden");
+    }
+
+    const fb = document.getElementById("feedback");
+    fb.style.display = "none"; fb.className = "feedback";
+
+    document.getElementById("nextArea").classList.add("hidden");
+    document.getElementById("nextArea").innerHTML = `<button class="primary-btn" onclick="nextTurn()">Continue</button>`;
+    document.getElementById("choices").innerHTML = "";
+    document.getElementById("reflection").classList.add("hidden");
+    document.getElementById("reflection").innerHTML = "";
+
+    document.getElementById("gameCard").scrollIntoView({ behavior:"smooth", block:"start" });
+
+    if (turn.finalOnly && turn.reflection) {
+      renderReflection(turn.reflection, true);
+      return;
+    }
+
+    // Turns with reflection that also have choices (Turn 5, 10, 15)
+    if (turn.choices) {
+      _shuffledChoices = shuffle(turn.choices);
+      renderChoices(_shuffledChoices);
+    }
+  }
+
+  function renderChoices(shuffled) {
+    document.getElementById("choices").innerHTML = shuffled.map((entry, i) => {
+      const letter = String.fromCharCode(65+i);
+      return `<button class="choice-btn" onclick="selectChoice(${i})" aria-label="Option ${letter}">
+        <span class="choice-letter" aria-hidden="true">${letter}</span>
+        <span>${entry.item.text}</span>
+      </button>`;
+    }).join("");
+  }
+
+  function selectChoice(displayIndex) {
+    const choiceData = _shuffledChoices[displayIndex].item;
+    applyChanges(choiceData.changes);
+    if (choiceData.planLabel) finalPlan = choiceData.planLabel;
+
+    showFeedback("Feedback on Your Decision", choiceData.feedback, choiceData.changes);
+    document.getElementById("choices").innerHTML = "";
+
+    const turn = turns[currentTurn];
+    if (turn.reflection) {
+      renderReflection(turn.reflection, false);
+    } else {
+      document.getElementById("nextArea").classList.remove("hidden");
+    }
+    renderScores();
+  }
+
+  function renderReflection(ref, isFinal) {
+    const box = document.getElementById("reflection");
+    box.classList.remove("hidden");
+    const intro = ref.intro ? `<p class="reflection-intro">${ref.intro}</p>` : "";
+
+    if (ref.type === "choice") {
+      _shuffledReflOpts = shuffle(ref.options);
+      box.innerHTML = `<h3>${ref.prompt}</h3>${intro}
+        <div class="choices" role="group" aria-label="Reflection options">
+          ${_shuffledReflOpts.map((entry, i) => {
+            const letter = String.fromCharCode(65+i);
+            return `<button class="choice-btn" onclick="selectReflectionChoice(${i})" aria-label="Option ${letter}">
+              <span class="choice-letter" aria-hidden="true">${letter}</span>
+              <span>${entry.item.text}</span>
+            </button>`;
+          }).join("")}
+        </div>`;
+    }
+
+    if (ref.type === "text") {
+      box.innerHTML = `<h3>${ref.prompt}</h3>${intro}
+        <textarea id="reflectionText" placeholder="Type your reflection here..." aria-label="Reflection response"></textarea>
+        <div style="margin-top:14px;">
+          <button class="primary-btn" onclick="submitTextReflection(${isFinal})">Submit Reflection</button>
+        </div>`;
+    }
+  }
+
+  function selectReflectionChoice(displayIndex) {
+    const optData = _shuffledReflOpts[displayIndex].item;
+    applyChanges(optData.changes);
+    reflections.push({ prompt: turns[currentTurn].reflection.prompt, response: optData.text, coaching: optData.feedback });
+    showFeedback("Feedback on Your Reflection", optData.feedback, optData.changes);
+    document.getElementById("reflection").innerHTML = "";
+    document.getElementById("nextArea").classList.remove("hidden");
+    renderScores();
+  }
+
+  function submitTextReflection(isFinal) {
+    const text = document.getElementById("reflectionText")?.value?.trim();
+    if (!text) { alert("Please enter your reflection before continuing."); return; }
+
+    const coaching = "Strong reflections in this simulation name a specific technology, data gap, or decision point from the scenario and connect it to a concrete implication for practice. The most useful insights tend to be specific: not just 'data has limitations' but which limitation, in which system, with which consequence for which population of nurses or patients.";
+    reflections.push({ prompt: turns[currentTurn].reflection.prompt, response: text, coaching });
+    showFeedback("Thanks for Reflecting", coaching, { data:1, tech:1 });
+    applyChanges({ data:1, tech:1 });
+    document.getElementById("reflection").innerHTML = "";
+    renderScores();
+
+    if (isFinal) {
+      document.getElementById("nextArea").innerHTML = `<button class="primary-btn" onclick="generateSummary()">View My Summary</button>`;
+    }
+    document.getElementById("nextArea").classList.remove("hidden");
+  }
+
+  function showFeedback(title, message, changes) {
+    const fb  = document.getElementById("feedback");
+    fb.className = `feedback ${feedbackClass(changes)}`;
+    const chips = Object.keys(changes||{}).map(k => {
+      const v = changes[k];
+      const cls = v>0?"pos":v<0?"neg":"neu";
+      return `<span class="score-chip ${cls}">${scoreNames[k]} ${v>0?"+":""}${v}</span>`;
+    }).join("");
+    fb.innerHTML = `<h3>${title}</h3><p>${message}</p>
+      ${chips ? `<div class="score-impact" aria-label="Score changes">${chips}</div>` : ""}`;
+    fb.style.display = "block";
+    fb.scrollIntoView({ behavior:"smooth", block:"nearest" });
+  }
+
+  function applyChanges(changes) {
+    Object.keys(changes||{}).forEach(k => {
+      scores[k] = Math.max(0, Math.min(100, scores[k] + changes[k]));
+    });
+  }
+
+  function nextTurn() {
+    currentTurn++;
+    if (currentTurn >= turns.length) generateSummary();
+    else renderTurn();
+  }
+
+  function performanceLevel(s) {
+    if (s >= 72) return { label:"Advanced",   cls:"level-advanced" };
+    if (s >= 60) return { label:"Proficient", cls:"level-proficient" };
+    if (s >= 45) return { label:"Developing", cls:"level-developing" };
+    return              { label:"Emerging",   cls:"level-emerging" };
+  }
+
+  /* ═══════════════════════════════════════════════
+     SUMMARY
+  ═══════════════════════════════════════════════ */
+  function generateSummary() {
+    document.getElementById("gameCard").classList.add("hidden");
+    document.getElementById("summaryCard").classList.remove("hidden");
+    document.getElementById("summaryCard").scrollIntoView({ behavior:"smooth", block:"start" });
+
+    document.getElementById("summaryIntro").innerHTML =
+      `<strong>Student:</strong> ${escapeHtml(studentName)} &nbsp;|&nbsp; ` +
+      `<strong>Simulation:</strong> University Hospital: Data Driven Decisions &nbsp;|&nbsp; ` +
+      `<strong>Completed:</strong> ${new Date().toLocaleDateString()}`;
+
+    document.getElementById("summaryScores").innerHTML =
+      `<h3>Your Leadership Metrics</h3>
+       <p style="color:var(--muted);font-size:0.93rem;margin-bottom:14px;">These scores reflect the cumulative effect of every decision you made across all 20 turns. Each choice carried positive or negative score changes that were applied in real time — the numbers you see here are the direct result of your choices.</p>` +
+      Object.keys(scores).map(k => {
+        const lv = performanceLevel(scores[k]);
+        return `<div class="metric-row">
+          <span>${scoreNames[k]}</span>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-weight:600;">${scores[k]}/100</span>
+            <span class="level-badge ${lv.cls}">${lv.label}</span>
+          </div>
+        </div>`;
+      }).join("");
+
+    const topKeys = Object.keys(scores).sort((a,b)=>scores[b]-scores[a]).slice(0,3);
+    document.getElementById("summaryStrengths").innerHTML =
+      `<h3>Where You Led Well</h3>
+       <p>Your decisions showed the most consistent strength in:</p>
+       ${topKeys.map(k=>`<span class="tag">${scoreNames[k]}</span>`).join("")}
+       <p style="margin-top:12px;">You demonstrated that technology-informed nursing leadership requires more than using data — it requires understanding how that data was generated, what it can and can't see, and when clinical judgment needs to take precedence over what the dashboard recommends.</p>`;
+
+    const lowKeys = Object.keys(scores).sort((a,b)=>scores[a]-scores[b]).slice(0,2);
+    document.getElementById("summaryGrowth").innerHTML =
+      `<h3>Areas to Keep Developing</h3>
+       <p>Continue building your approach to:</p>
+       ${lowKeys.map(k=>`<span class="tag">${scoreNames[k]}</span>`).join("")}
+       <p style="margin-top:12px;">These areas reflect some of the most complex challenges in nursing informatics leadership: balancing data transparency with privacy, advocating for nursing's voice in technology planning, and making ethical technology decisions with incomplete information and limited resources.</p>`;
+
+    document.getElementById("summaryReflections").innerHTML =
+      `<h3>Your Reflections</h3>` +
+      (reflections.length === 0
+        ? `<p style="color:var(--muted);">No reflections were submitted.</p>`
+        : reflections.map((r,i) => `
+          <div class="reflection-entry">
+            <p class="r-prompt">Reflection ${i+1}: ${escapeHtml(r.prompt)}</p>
+            <p class="r-response">${escapeHtml(r.response)}</p>
+            <p class="r-coaching"><strong>Coaching note:</strong> ${escapeHtml(r.coaching)}</p>
+          </div>`).join(""));
+
+    document.getElementById("summaryPlan").innerHTML =
+      `<h3>Completion Note</h3>
+       <p>This summary confirms your completion of the University Hospital: Data Driven Decisions simulation. Save it as a PDF and submit to Canvas.</p>
+       <p style="color:var(--muted);font-size:0.9rem;margin-top:10px;">The decisions and reflections documented here represent your engagement with technology-informed nursing leadership across four phases: Reading the Signal, Making Meaning, Choosing Technology Responses, and Communicating and Sustaining.</p>`;
+  }
+
+  function restartGame() {
+    scores = { ...startingScores };
+    currentTurn = 0; reflections = []; finalPlan = "";
+    _shuffledChoices = []; _shuffledReflOpts = [];
+    document.getElementById("summaryCard").classList.add("hidden");
+    document.getElementById("startCard").classList.remove("hidden");
+    document.getElementById("studentName").value = "";
+    renderScores();
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+
+  function escapeHtml(v) {
+    return String(v)
+      .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;").replace(/'/g,"&#039;");
+  }
+
+  renderScores();
+  </script>
+</body>
+</html>
