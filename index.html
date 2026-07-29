@@ -434,6 +434,16 @@
         <div class="metric-chip" role="listitem"><strong>Trust and Transparency</strong><span>Communicating data findings honestly and building confidence with staff</span></div>
       </div>
 
+      <h3 style="margin: 24px 0 10px;">People You'll Meet</h3>
+      <p style="color:var(--muted); font-size:0.93rem; margin-bottom:12px;">Throughout the simulation, you'll hear from five staff members at University Hospital. Each one brings a different perspective on how technology and data affect their work.</p>
+      <ul class="character-list">
+        <li><strong>Samir Patel, MSN, RN-BC</strong><span class="char-role">Informatics Nurse &bull; Your technology guide</span><span class="desc">Methodical and precise. Samir built the dashboard and knows exactly where the data falls short. He'll push you to think carefully about what the technology is actually measuring before you draw conclusions.</span></li>
+        <li><strong>Mara Jensen, RN</strong><span class="char-role">ICU Charge Nurse &bull; 25 years experience</span><span class="desc">Direct and protective of her team. Mara has seen technology come and go at University Hospital. She'll support data-driven approaches, but only when they're backed by real follow-through.</span></li>
+        <li><strong>Caleb Reed, RN</strong><span class="char-role">Med-Surg Nurse &bull; First year at University Hospital</span><span class="desc">Still finding his footing. Caleb uses technology fluently but worries about how the data collected about nurses might be used by leadership.</span></li>
+        <li><strong>Nora White, RN</strong><span class="char-role">Night Shift Nurse &bull; 12 years experience</span><span class="desc">Measured and skeptical. Nora has seen night shift data get absorbed into hospital-wide averages and disappear. She wants to know the technology will actually represent her team's reality.</span></li>
+        <li><strong>Lena Brooks, CNA</strong><span class="char-role">Float CNA &bull; Sees the whole hospital</span><span class="desc">Observant and pragmatic. Because she floats between units, Lena notices workflow gaps others miss. She's cautious about technology that adds steps without improving care.</span></li>
+      </ul>
+
       <div style="margin-top:26px;">
         <label for="studentName" style="font-weight:600; display:block; margin-bottom:8px;">Enter your name for the final summary:</label>
         <input id="studentName" type="text" placeholder="Your full name" aria-required="true" style="max-width:380px;" />
@@ -460,7 +470,7 @@
         <div id="nextArea" class="hidden" style="margin-top:20px;"></div>
       </section>
 
-      <aside class="side-panel" aria-label="Simulation sidebar">
+      <aside class="side-panel hidden" id="sidePanel" aria-label="Simulation sidebar">
         <section class="card compact-card" aria-label="Leadership metrics">
           <h3>Your Leadership Metrics</h3>
           <div id="scoreboard" aria-live="polite" aria-atomic="true"></div>
@@ -1147,6 +1157,7 @@
     studentName = document.getElementById("studentName").value.trim() || "Student";
     document.getElementById("startCard").classList.add("hidden");
     document.getElementById("gameCard").classList.remove("hidden");
+    document.getElementById("sidePanel").classList.remove("hidden");
     renderTurn();
     renderScores();
   }
@@ -1389,6 +1400,7 @@
     _shuffledChoices = []; _shuffledReflOpts = [];
     document.getElementById("summaryCard").classList.add("hidden");
     document.getElementById("startCard").classList.remove("hidden");
+    document.getElementById("sidePanel").classList.add("hidden");
     document.getElementById("studentName").value = "";
     renderScores();
     window.scrollTo({ top:0, behavior:"smooth" });
