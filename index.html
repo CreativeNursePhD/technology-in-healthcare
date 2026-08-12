@@ -1241,11 +1241,21 @@
 
     const turn = turns[currentTurn];
     if (turn.reflection) {
-      renderReflection(turn.reflection, false);
+      // Show Continue button that reveals the reflection when clicked
+      document.getElementById("nextArea").innerHTML = `<button class="primary-btn" onclick="showTurnReflection()">Continue</button>`;
+      document.getElementById("nextArea").classList.remove("hidden");
     } else {
       document.getElementById("nextArea").classList.remove("hidden");
     }
     renderScores();
+  }
+
+  function showTurnReflection() {
+    const turn = turns[currentTurn];
+    document.getElementById("feedback").style.display = "none";
+    document.getElementById("nextArea").classList.add("hidden");
+    document.getElementById("nextArea").innerHTML = `<button class="primary-btn" onclick="nextTurn()">Continue</button>`;
+    renderReflection(turn.reflection, false);
   }
 
   function renderReflection(ref, isFinal) {
