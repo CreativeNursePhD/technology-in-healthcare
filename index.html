@@ -739,23 +739,9 @@
       ${conflictBox("Kronos shows 41.2 avg hours/week. Mara reports significant untracked overtime, missed breaks, and off-clock work. The survey shows ICU concern at 7.8/10. Which data source do you trust?")}
       <p><strong>How do you reconcile the data conflict?</strong></p>`,
       reflection: {
-        type: "choice",
-        prompt: "Reflection: When technology-generated data and a nurse's direct experience tell different stories, how should a nurse leader respond?",
-        intro: "This is one of the most important questions in healthcare informatics. Choose the response that best reflects your thinking.",
-        options: [
-          c("Investigate why the systems disagree. Kronos only captures clocked hours. Mara's account suggests important work isn't being recorded, which means the data has a structural gap.",
-            { data:2, tech:2, trust:1 },
-            "This is exactly the right response. When clinical data and lived experience diverge, the first question is why — not which one is right. In this case, Kronos has a real structural limitation: it only measures recorded time. Off-clock work, missed breaks, and informal coverage arrangements are invisible to it. Both sources are telling you something true about different dimensions of the same problem."),
-          c("Trust the Kronos data because it's objective and system-generated, unlike individual staff impressions.",
-            { data:-2, tech:-1, trust:-2 },
-            "System-generated data isn't inherently more accurate than human observation — it's just differently limited. Kronos measures what gets clocked in and out. It can't measure off-clock work, missed breaks, or the physical and emotional toll of running a unit short-staffed. Over-reliance on quantitative data at the expense of staff voice is a leadership failure, not a data-driven approach."),
-          c("Trust Mara's account because she has 25 years of experience and knows her unit better than any system does.",
-            { data:-1, tech:-1 },
-            "Mara's experience is important and shouldn't be dismissed — but anchoring on one person's account without investigating the data gap isn't rigorous either. The strongest response holds both: her account identifies a structural limitation in the data that's worth investigating, not a reason to abandon the data entirely."),
-          c("Acknowledge both sources, document the discrepancy, and propose a way to capture the data Kronos is missing.",
-            { data:2, tech:2, trust:2 },
-            "This is strong, practical data stewardship. Naming the discrepancy explicitly, documenting it, and proposing a solution — like an off-clock work log, break tracking, or a structured charge nurse report — turns the conflict into an improvement opportunity. This is how healthcare informatics actually advances in practice.")
-        ]
+        type: "text",
+        prompt: "Reflection: When technology-generated data and a nurse's direct experience tell different stories, how should a nurse leader decide what to trust?",
+        intro: "Write 2–3 sentences. Think about what you just saw with Kronos and Mara's account, and what it means for how you use system-generated data going forward."
       },
       choices: [
         c("Accept that the Kronos data and Mara's account are both partially right, and identify what Kronos is structurally unable to capture.",
